@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
+    "build": "tsc --strict",
+    "build:watch": "tsc --strict --watch",
     "start": "nodemon --require dotenv/config dist/index.js"
   },
   "author": "",

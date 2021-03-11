@@ -63,7 +63,7 @@ export function startServer(repo: Repository) {
       return;
     }
 
-    const { id } = await repo.articles.addOne({
+    const insertResult = await repo.articles.addOne({
       sourceUrl: cleanedUrl,
       slug: "jaj2fdsf3jklds",
       html: article.content,

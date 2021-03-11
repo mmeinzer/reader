@@ -26,9 +26,11 @@ type ArticleInsertInput = {
   slug: string;
   html: string | null;
 };
+
 type ArticleInsertResult = {
   id: number | null;
 };
+
 const insertArticle = `INSERT INTO ${tableName} (source_url, slug, html) VALUES (?, ?, ?)`;
 
 export function newArticlesRepo(db: Database) {
@@ -39,6 +41,7 @@ export function newArticlesRepo(db: Database) {
       return db.get<ArticlesRow>(selectArticleBySourceUrl, sourceUrl);
     },
 
+    /** Adds an article and returning an id of null on failure */
     addOne({
       sourceUrl,
       slug,
