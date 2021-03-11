@@ -21,9 +21,12 @@ type ArticlesRow = {
 
 const articleBySourceUrl = `SELECT id, source_url, slug, html FROM ${tableName} WHERE source_url LIKE ?`;
 
-export function getArticleBySourceUrl(
-  db: Database,
-  sourceUrl: string
-): Promise<Readonly<ArticlesRow | undefined>> {
-  return db.get<ArticlesRow>(articleBySourceUrl, sourceUrl);
+export function newArticlesRepo(db: Database) {
+  return {
+    getOneBySourceUrl(
+      sourceUrl: string
+    ): Promise<Readonly<ArticlesRow | undefined>> {
+      return db.get<ArticlesRow>(articleBySourceUrl, sourceUrl);
+    },
+  };
 }

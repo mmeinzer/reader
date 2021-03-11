@@ -2,11 +2,10 @@ import express from "express";
 import bodyParser from "body-parser";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
-import { Database } from "sqlite";
-import { getArticleBySourceUrl } from "./articles";
+import { Repository } from "./repo";
 import { fetch } from "./fetch";
 
-export function startServer(db: Database) {
+export function startServer({ articles }: Repository) {
   const app = express();
   const port = process.env.PORT ?? 8000;
 
@@ -41,7 +40,7 @@ export function startServer(db: Database) {
       return;
     }
 
-    const maybeRow = await getArticleBySourceUrl(db, cleanedUrl);
+    const maybeRow = await articles.getOneBySourceUrl(cleanedUrl);
 
     if (maybeRow) {
       resBody = { redirectUrl: maybeRow.slug };
@@ -66,13 +65,13 @@ export function startServer(db: Database) {
       return;
     }
 
-    await db.run(
-      "INSERT INTO articles (source_url, slug, html) VALUES (?, ?, ?)",
-      req.body.url,
-      // TODO: get better slug logic
-      article.title.trim().split(" ").join("-"),
-      article.content
-    );
+    // await db.run(
+    //   "INSERT INTO articles (source_url, slug, html) VALUES (?, ?, ?)",
+    //   req.body.url,
+    //   // TODO: get better slug logic
+    //   article.title.trim().split(" ").join("-"),
+    //   article.content
+    // );
 
     resBody = { redirectUrl: "https://www.google.com" };
     res.send(resBody);
