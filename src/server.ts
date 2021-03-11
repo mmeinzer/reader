@@ -1,8 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { Database } from "sqlite3";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
+import { Database } from "sqlite";
+import { getArticleBySourceUrl } from "./articles";
 import { fetch } from "./fetch";
 
 export function startServer(db: Database) {
@@ -25,14 +26,30 @@ export function startServer(db: Database) {
 
     if (!req.body.url) {
       resBody = { error: "Request must include url" };
-
       res.status(400).send(resBody);
       return;
     }
 
-    // TODO: first clean the url so we can de-dupe them
+    const { url } = req.body;
+    let cleanedUrl: string;
+    try {
+      const urlObject = new URL(url);
+      cleanedUrl = urlObject.origin + urlObject.pathname;
+    } catch (e) {
+      resBody = { error: "Invalid url" };
+      res.status(400).send(resBody);
+      return;
+    }
 
-    const articleRes = await fetch(req.body.url);
+    const maybeRow = await getArticleBySourceUrl(db, cleanedUrl);
+
+    if (maybeRow) {
+      resBody = { redirectUrl: maybeRow.slug };
+      res.send(resBody);
+      return;
+    }
+
+    const articleRes = await fetch(cleanedUrl);
     if (!articleRes.body || articleRes.error) {
       resBody = { error: "Error fetching article" };
       res.status(500).send(resBody);
@@ -49,13 +66,12 @@ export function startServer(db: Database) {
       return;
     }
 
-    db.run(
+    await db.run(
       "INSERT INTO articles (source_url, slug, html) VALUES (?, ?, ?)",
       req.body.url,
       // TODO: get better slug logic
       article.title.trim().split(" ").join("-"),
-      article.content,
-      (err: Error | null) => console.log(err)
+      article.content
     );
 
     resBody = { redirectUrl: "https://www.google.com" };

@@ -1,19 +1,26 @@
 import sqlite3 from "sqlite3";
+import { Database, open } from "sqlite";
+import { createTable as createArticlesTable } from "./articles";
 
-const db = new sqlite3.Database(process.env.DB_FILENAME ?? ":memory:", () => {
-  console.log("sqlite running");
-});
+export default async function openDb(
+  dbFilename: string
+): Promise<Database | null> {
+  return open({
+    filename: dbFilename,
+    driver: sqlite3.Database,
+  })
+    .then(async (db) => {
+      console.log("sqlite running");
 
-db.run(
-  "CREATE TABLE IF NOT EXISTS articles (id INTEGER PRIMARY KEY, slug TEXT NOT NULL UNIQUE, html TEXT, source_url TEXT NOT NULL UNIQUE)",
-  (err) => {
-    if (err) {
+      // Setup tables
+      await db.exec(createArticlesTable);
+
+      console.log("table created or exists");
+      return db;
+    })
+    .catch((err) => {
+      console.error("error initializing db");
       console.error(err);
-      return;
-    }
-
-    console.log("articles table initialized");
-  }
-);
-
-export default db;
+      return null;
+    });
+}
