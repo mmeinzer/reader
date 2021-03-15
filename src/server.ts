@@ -8,17 +8,27 @@ import { fetch } from "./fetch";
 export function startServer(repo: Repository) {
   const app = express();
   const port = process.env.PORT ?? 8000;
-
   app.use(bodyParser.json());
 
   app.get("/health", (_, res) => {
     res.send("OK");
   });
 
-  type PostArticleResponse = {
-    redirectUrl: string | null;
-    error: string | null;
-  };
+  app.get("/:articleSlug", async (req, res) => {
+    const { articleSlug } = req.params;
+    if (!articleSlug) {
+      res.status(400).send("Bad request");
+      return;
+    }
+
+    const foundArticle = await repo.articles.getOneByHash(articleSlug);
+    if (!foundArticle || foundArticle.html === undefined) {
+      res.status(404).send("Not found");
+      return;
+    }
+
+    res.send(foundArticle.html);
+  });
 
   app.post("/article", async (req, res) => {
     let resBody: PostArticleResponse;
@@ -65,11 +75,10 @@ export function startServer(repo: Repository) {
 
     const insertResult = await repo.articles.addOne({
       sourceUrl: cleanedUrl,
-      slug: "jaj2fdsf3jklds",
       html: article.content,
     });
 
-    resBody = { redirectUrl: "https://www.google.com", error: null };
+    resBody = { redirectUrl: insertResult.slug, error: null };
     res.send(resBody);
   });
 
@@ -77,3 +86,8 @@ export function startServer(repo: Repository) {
     console.log(`server started at http://localhost:${port}`);
   });
 }
+
+type PostArticleResponse = {
+  redirectUrl: string | null;
+  error: string | null;
+};
