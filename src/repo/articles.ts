@@ -29,8 +29,11 @@ function hashFromId(id: number): string {
 }
 
 function idFromHash(hash: string): number | undefined {
-  const maybeNumber = hashids.decode(hash)[0];
+  if (!hashids.isValidId(hash)) {
+    return undefined;
+  }
 
+  const maybeNumber = hashids.decode(hash)[0];
   // maybe number is always a number - exclude 0 though
   if (!maybeNumber) {
     return undefined;
