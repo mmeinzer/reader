@@ -82,7 +82,7 @@ export function startServer(repo: Repository) {
     res.send(resBody);
   });
 
-  app.listen(port, () => {
+  return app.listen(port, () => {
     console.log(`server started at http://localhost:${port}`);
   });
 }

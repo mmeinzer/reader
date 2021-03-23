@@ -12,8 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "@mozilla/readability": "^0.4.1",
+    "@types/death": "^1.1.1",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
+    "death": "^1.1.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "hashids": "^2.2.8",

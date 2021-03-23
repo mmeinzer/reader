@@ -1,3 +1,4 @@
+import ON_DEATH from "death";
 import openDb from "./db";
 import { newRepo } from "./repo";
 import { startServer } from "./server";
@@ -11,5 +12,15 @@ import { startServer } from "./server";
 
   const repo = newRepo(db);
 
-  startServer(repo);
+  const server = startServer(repo);
+
+  ON_DEATH(async (sig) => {
+    console.log(`got signal ${sig}`);
+    server.close(() => {
+      console.log("HTTP server closed");
+    });
+    await db.close();
+    console.log("database closed");
+    process.exit(0);
+  });
 })();
