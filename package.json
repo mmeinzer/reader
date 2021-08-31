@@ -21,7 +21,7 @@
     "hashids": "^2.2.8",
     "jsdom": "^16.4.0",
     "sqlite": "^4.0.19",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^4.2.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
